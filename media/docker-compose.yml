@@ -1,21 +1,5 @@
 ---
 services:
-
-  #######################
-  # HOMARR 
-  #######################
-  homarr:
-    container_name: homarr
-    image: ghcr.io/homarr-labs/homarr:latest
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
-      - ./homarr/appdata:/appdata
-    environment:
-      - SECRET_ENCRYPTION_KEY=814d704cea1c25a622092162e1542ee6aafabd97650cd576c98a9d4cc1e266ad #default on the Homarr docs
-    ports:
-      - '7575:7575'
-
   #######################
   # PROWLARR 
   #######################
@@ -25,9 +9,9 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=${TZ}
     volumes:
-      - /path/to/prowlarr/data:/config
+      - ./appdata/prowlarr:/config
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -41,11 +25,11 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=${TZ}
     volumes:
-      - /path/to/radarr/data:/config
-      - /path/to/movies:/movies #optional
-      - /path/to/download-client-downloads:/downloads #optional
+      - ./appdata/radarr:/config
+      - ${DATA_VOLUME}/media/movies:/movies #optional
+      - ${DATA_VOLUME}/torrents/movies:/downloads #optional
     ports:
       - 7878:7878
     restart: unless-stopped 
@@ -59,11 +43,11 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=${TZ}
     volumes:
-      - /path/to/sonarr/data:/config
-      - /path/to/tvseries:/tv #optional
-      - /path/to/downloadclient-downloads:/downloads #optional
+      - ./appdata/sonarr:/config
+      - ${DATA_VOLUME}/media/tv:/tv #optional
+      - ${DATA_VOLUME}/torrents/tv:/downloads #optional
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -77,12 +61,12 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=${TZ}
       - WEBUI_PORT=8080
       - TORRENTING_PORT=6881
     volumes:
-      - /path/to/qbittorrent/appdata:/config
-      - /path/to/downloads:/downloads #optional
+      - ./appdata/qbittorrent:/config
+      - ${DATA_VOLUME}/torrents:/downloads #optional
     ports:
       - 8080:8080
       - 6881:6881
@@ -98,12 +82,10 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
-      - JELLYFIN_PublishedServerUrl=http://192.168.0.5 #optional
+      - TZ=${TZ}
     volumes:
-      - /path/to/jellyfin/library:/config
-      - /path/to/tvseries:/data/tvshows
-      - /path/to/movies:/data/movies
+      - ./appdata/jellyfin:/config
+      - ${DATA_VOLUME}/media:/media
     ports:
       - 8096:8096
       - 8920:8920 #optional
