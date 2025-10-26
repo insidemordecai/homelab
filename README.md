@@ -1,2 +1,2 @@
-# homelab
-homelab stacks and resources for my use
+# My Homelab Setup
+Homelab stacks and resources for my use.
