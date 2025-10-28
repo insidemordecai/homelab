@@ -29,8 +29,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ./appdata/radarr:/config
-      - ${DATA_VOLUME}/media:/media
-      - ${DATA_VOLUME}/torrents/completed:/downloads/completed
+      - ${DATA_VOLUME}/data:/data
     # comment out ports to use host's ports directly
     # ports: 
       # - 7878:7878
@@ -49,8 +48,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ./appdata/sonarr:/config
-      - ${DATA_VOLUME}/media:/media
-      - ${DATA_VOLUME}/torrents/completed:/downloads/completed
+      - ${DATA_VOLUME}/data:/data
     # comment out ports to use host's ports directly
     # ports:
       # - 8989:8989
@@ -89,10 +87,10 @@ services:
       - TZ=${TZ}
     volumes:
       - ./appdata/jellyfin:/config
-      - ${DATA_VOLUME}/media:/media
+      - ${DATA_VOLUME}/data:/data
     ports:
       - 8096:8096
-      - 8920:8920 #optional
-      - 7359:7359/udp #optional
-      - 1900:1900/udp #optional
+      - 8920:8920
+      - 7359:7359/udp
+      - 1900:1900/udp
     restart: unless-stopped
