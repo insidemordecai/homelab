@@ -22,16 +22,18 @@ services:
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
+    network_mode: host
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=${TZ}
     volumes:
       - ./appdata/radarr:/config
-      - ${DATA_VOLUME}/media/movies:/movies #optional
-      - ${DATA_VOLUME}/torrents/movies:/downloads #optional
-    ports:
-      - 7878:7878
+      - ${DATA_VOLUME}/media:/media
+      - ${DATA_VOLUME}/torrents/completed:/downloads/completed
+    # comment out ports to use host's ports directly
+    # ports: 
+      # - 7878:7878
     restart: unless-stopped 
 
   #######################
@@ -40,38 +42,40 @@ services:
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
+    network_mode: host
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=${TZ}
     volumes:
       - ./appdata/sonarr:/config
-      - ${DATA_VOLUME}/media/tv:/tv #optional
-      - ${DATA_VOLUME}/torrents/tv:/downloads #optional
-    ports:
-      - 8989:8989
+      - ${DATA_VOLUME}/media:/media
+      - ${DATA_VOLUME}/torrents/completed:/downloads/completed
+    # comment out ports to use host's ports directly
+    # ports:
+      # - 8989:8989
     restart: unless-stopped
 
   #######################
   # QBITTORRENT 
   #######################
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
-    container_name: qbittorrent
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=6881
-    volumes:
-      - ./appdata/qbittorrent:/config
-      - ${DATA_VOLUME}/torrents:/downloads #optional
-    ports:
-      - 8080:8080
-      - 6881:6881
-      - 6881:6881/udp
-    restart: unless-stopped
+  # qbittorrent:
+  #   image: lscr.io/linuxserver/qbittorrent:latest
+  #   container_name: qbittorrent
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=${TZ}
+  #     - WEBUI_PORT=8080
+  #     - TORRENTING_PORT=6881
+  #   volumes:
+  #     - ./appdata/qbittorrent:/config
+  #     - ${DATA_VOLUME}/torrents:/downloads
+  #   ports:
+  #     - 8080:8080
+  #     - 6881:6881
+  #     - 6881:6881/udp
+  #   restart: unless-stopped
 
   #######################
   # JELLYFIN 
