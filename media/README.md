@@ -1,7 +1,8 @@
+# Media Server and Aggregation
 ## Prerequisite 
 You need to have these installed: 
-- Docker 
-- Docker Compose 
+- [Docker](https://docs.docker.com/engine/install/) 
+- [Docker Compose](https://docs.docker.com/compose/install/)
 ## Setup Process
 ### Folder Mapping 
 At a high level, all the files will be under `/data` on our hard drive. 
