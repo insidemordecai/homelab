@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     networks:
-      - cloudflared
+      - stacknet 
 networks:
-  cloudflared:
-    name: cloudflared
+  stacknet:
+    external: true 
