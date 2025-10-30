@@ -52,7 +52,7 @@ docker compose rm # to remove containers (stop container first)
 
 > [!CAUTION]
 > `.env` files are ignored but be careful.
-> Do NOT commit or push the changes you make to the `.env` file to avoid sharing your tokens.
+> Do NOT commit or push the changes you make to the `.env` files to avoid sharing your tokens.
 ### qBittorrent
 http://localhost:8080
 
@@ -125,13 +125,13 @@ I personally like to:
 	- Check 'Unmonitor Delete Movies' 
 	- Show Advanced and change 'Proper and Repacks' to 'Do Not Prefer', this will use our custom formats scoring to pick the preferred media.
 - Add a few custom formats under *Custom Formats* 
-	- Medium File Size - set you minimum and max file size for media downloaded
-	- x264 - use preset under 'Release Title' and check 'Required' to find files with H264.
-	- x265 - use preset under 'Release Title' and check 'Required' to find files with H265. 
+	- Medium File Size - set you minimum and max file size for media downloaded and check 'Required'.
+	- x264 - use preset under 'Release Title' and check 'Required' to find files encoded with H264.
+	- x265 - use preset under 'Release Title' and check 'Required' to find files encoded with H265. 
 	- Repack/Proper - import from [TRaSH Guide's Collection](https://trash-guides.info/Radarr/Radarr-collection-of-custom-formats/#repackproper) to allow Radarr to still pick repacks/proper files. 
 - Tweak different quality profiles under *Profiles*
-	- Uncheck Remux since they tend to be large files 
-	- Set the score for the custom formats created e.g 1000 for Medium File Size, 900 for x264, 100 for x265 and 1 for Repack/Proper. I tend swap around the scores for x264 and x265 depending on the quality profile. 
+	- Uncheck Remux since they tend to be large files.
+	- Set the score for the custom formats created e.g 1000 for Medium File Size, and 1 for Repack/Proper. You can also score x264 and x265 depending on your preference. and your media player's codec support.
 #### Sonarr
 http://localhost:8989
 
