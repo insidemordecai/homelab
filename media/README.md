@@ -24,6 +24,10 @@ mkdir -p torrents/{completed,incomplete} && mkdir -p media/{movies,tv}
 ```
 ### Step 0
 - Clone this repository or download a zip of it.
+- In the root directory, run this command to copy all `.env.example` templates as `.env` in each subdirectory for you to edit.
+```shell
+find . -name '.env.example' -execdir cp .env.example .env \;
+```
 - Navigate to the directory with the `docker-compose.yml` file. 
 - Add your user to the `docker` group to not have to prepend `sudo` to each docker command.
 ```shell
@@ -47,6 +51,7 @@ docker compose rm # to remove containers (stop container first)
 - Configure the different apps now.
 
 > [!CAUTION]
+> `.env` files are ignored but be careful.
 > Do NOT commit or push the changes you make to the `.env` file to avoid sharing your tokens.
 ### qBittorrent
 http://localhost:8080
