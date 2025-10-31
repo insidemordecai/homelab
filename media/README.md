@@ -149,8 +149,36 @@ Still under *Download Clients*, configure Remote Path Mapping.
 Go to *Settings→ General*, scroll down to API key and copy it.
 Go to Prowlarr then *Settings → Apps*, click on the `+` , add Sonarr  and paste the API key.
 Change the Prowlarr and Sonarr server address to match this format: `http://container-name:port`.
-Test and save. 
+Test and save.
+#### Bazarr
+http://localhost:6767
 
+Head into *Settings → Sonarr* and enable it. 
+Fill in your Sonarr server details and test. 
+Set the minimum score in *Options* (TRaSH-Guide recommend `90`) and save your settings. 
+
+Repeat the same steps for Radarr by heading into *Settings → Radarr* and enable it. 
+Fill in your Radarr server details and test.
+Set the minimum score to `80` and save your settings.
+
+Now go to *Settings → Languages*. 
+Pick your desired language in the 'Language Filter'. 
+Under *Language Profiles*, select 'Add New Profile' and give it a name.
+Click on `Add` to add the language(s) you enabled earlier and configure the other options.
+Under *Default Language Profiles For Newly Added Shows*, enable 'Series' and 'Movies' and pick the profile you created.
+Save your settings. 
+
+Go to *Settings → Providers* and click on the `+` symbol to add your subtitle provider. 
+You will be required to enter you credentials for these providers such as [opensubtitles.com](https://opensubtitles.com), therefore, create an account with your desired provider first.
+Some that will not require you to create an account include: Podnapisi, Supersubtitles and TVSubtitles.
+Save your settings. 
+
+Under *Settings → Subtitles*, scroll to *Embedded Subtitles Handling*. 
+You might prefer to enable 'Ignore Embedded PGS Subtitles' and 'Ignore Embedded ASS Subtitles' if your media players have issues with these type of subtitles. 
+For example, Jellyfin for Samsung TV (check out [Jellyfin 2 Samsung](https://github.com/PatrickSt1991/Samsung-Jellyfin-Installer) and [Install Jellyfin Tizen](https://github.com/Georift/install-jellyfin-tizen) for how to sideload the app) attempts to transcode when selecting PGS subtitles but just never plays. 
+Scroll to *Audio Synchronization / Alignment* and enable 'Automatic Subtitles Audio Synchronization'. 
+Set the 'Score Threshold For Audio Sync' as `96` for Series and `86` for Movies. 
+Save your settings
 That's it, you can follow the tweaks made in Radarr in Sonarr as well. 
 ### Jellyfin
 http://localhost:8096 
