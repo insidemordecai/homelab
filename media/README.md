@@ -1,4 +1,21 @@
 # Media Server and Aggregation
+This setup is based on Docker to install media servers and aggregators for easy sourcing of files and streaming. 
+## Table of Contents
+- [Prerequisite](#prerequisite)
+- [Setup Process](#setup-process)
+  - [Folder Mapping](#folder-mapping)
+  - [Step 0](#step-0)
+  - [qBittorrent](#qbittorrent)
+  - [Arr Apps](#arr-apps)
+    - [Prowlarr](#prowlarr)
+    - [Flaresolverr](#flaresolverr)
+    - [Radarr](#radarr)
+    - [Sonarr](#sonarr)
+    - [Bazarr](#bazarr)
+  - [Jellyfin](#jellyfin)
+  - [Jellyseerr](#jellyseerr)
+- [Firewall](#firewall)
+- [Useful Links](#useful-links)
 ## Prerequisite 
 You need to have these installed: 
 - [Docker](https://docs.docker.com/engine/install/) 
@@ -124,10 +141,11 @@ I personally like to:
 - *Media Management*:
 	- Check 'Unmonitor Delete Movies' 
 	- Show Advanced and change 'Proper and Repacks' to 'Do Not Prefer', this will use our custom formats scoring to pick the preferred media.
+	- Show Advanced and change 'Movie Folder Format'. I typically add IMDb external ID inline with [Jellyfin Movies naming scheme](https://jellyfin.org/docs/general/server/media/movies).
 - Add a few custom formats under *Custom Formats* 
-	- Medium File Size - set you minimum and max file size for media downloaded and check 'Required'.
-	- x264 - use preset under 'Release Title' and check 'Required' to find files encoded with H264.
-	- x265 - use preset under 'Release Title' and check 'Required' to find files encoded with H265. 
+	- Medium File Size - set you minimum and max file size for media downloaded and check 'Required'. You can create another for Small and Large file sizes if you desire.
+	- x264 - use preset under 'Release Title' and check 'Required' to find files encoded with H.264.
+	- x265 - use preset under 'Release Title' and check 'Required' to find files encoded with H.265. 
 	- Repack/Proper - import from [TRaSH Guide's Collection](https://trash-guides.info/Radarr/Radarr-collection-of-custom-formats/#repackproper) to allow Radarr to still pick repacks/proper files. 
 - Tweak different quality profiles under *Profiles*
 	- Uncheck Remux since they tend to be large files.
@@ -150,6 +168,12 @@ Go to *Settings→ General*, scroll down to API key and copy it.
 Go to Prowlarr then *Settings → Apps*, click on the `+` , add Sonarr  and paste the API key.
 Change the Prowlarr and Sonarr server address to match this format: `http://container-name:port`.
 Test and save.
+
+For tweaks to Sonarr settings, look at Radarr's tweaks as they are similar.
+One major difference to account for is:
+- *Media Management*
+	- Follow [Jellyfin TV Shows naming scheme](https://jellyfin.org/docs/general/server/media/shows) to add IMDb external ID to the 'Series Folder Format'.
+ 	- Check 'Rename Episodes'.
 #### Bazarr
 http://localhost:6767
 
