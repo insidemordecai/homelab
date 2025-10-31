@@ -47,7 +47,7 @@ services:
     networks:
       - stacknet
     extra_hosts:
-      - "qbittorrent:172.17.0.1"  # allows us of 'qbittorrent' as hostname
+      - "qbittorrent:172.17.0.1"  # allows use of 'qbittorrent' as hostname
     restart: unless-stopped 
 
   sonarr:
