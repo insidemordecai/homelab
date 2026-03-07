@@ -13,7 +13,7 @@ This setup is based on Docker to install media servers and aggregators for easy 
     - [Sonarr](#sonarr)
     - [Bazarr](#bazarr)
   - [Jellyfin](#jellyfin)
-  - [Jellyseerr](#jellyseerr)
+  - [Seerr](#seerr)
 - [Firewall](#firewall)
 - [Useful Links](#useful-links)
 ## Prerequisite 
@@ -209,10 +209,10 @@ http://localhost:8096
 
 Configure Jellyfin on your browser and add your media library with matching folders as what is in the `docker-compose.yml` file. 
 That is `/data/media/movies` and `data/media/tv` in our case
-### Jellyseerr 
+### Seerr 
 http://localhost:5055
 
-Open Jellyseerr and follow the on-screen guide.
+Open Seerr and follow the on-screen guide.
 - Enter the Jellyfin hostname `jellyfin` and leave the port as is unless you had changed this. 
 - Test and save. API keys will be configured automatically.
 - Add Radarr and Sonarr. 
