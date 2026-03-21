@@ -87,7 +87,7 @@ services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
-    network_mode: host
+    network_mode: host   # port 6881 is forwarded on the router to the host to avoid "Firewalled" issue thus container needs to be on host's network (EXERCISE CAUTION)
     environment:
       - PUID=1000
       - PGID=1000
