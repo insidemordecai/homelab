@@ -147,6 +147,25 @@ services:
       retries: 3
     restart: unless-stopped
 
+    audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    # ABS runs on port 13378 by default. If you want to change
+    # the port, only change the external port
+    ports:
+      - 13378:80
+    volumes:
+      - ./appdata/audiobookshelf:/config
+      - ./appdata/audiobookshelf/metadata:/metadata
+      - ${DATA_VOLUME}/data:/data
+    environment:
+      - TZ=${TZ}
+    networks:
+      - stacknet
+    restart: unless-stopped
+    # Audiobookshelf does not use PUID or GUID environment variables.
+    # To run as a different user, use the following directive.
+    #user: 1000:1000
+
 networks:
   stacknet:
     external: true
