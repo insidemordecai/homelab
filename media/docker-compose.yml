@@ -147,7 +147,7 @@ services:
       retries: 3
     restart: unless-stopped
 
-    audiobookshelf:
+  audiobookshelf:
     image: ghcr.io/advplyr/audiobookshelf:latest
     # ABS runs on port 13378 by default. If you want to change
     # the port, only change the external port
