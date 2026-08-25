@@ -68,6 +68,20 @@ services:
       - "qbittorrent:172.17.0.1"  # allows use of 'qbittorrent' as hostname
     restart: unless-stopped
 
+  trailarr:
+    image: nandyalu/trailarr:latest
+    container_name: trailarr
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ./appdata/trailarr:/config # For Trailarr's database and logs
+      - ${DATA_VOLUME}/data:/data # Radarr & Sonarr map
+    ports:
+      - "7889:7889" # Or choose a different host port if 7889 is taken, leave the right side as is
+    networks:
+      - stacknet
+    restart: unless-stopped
+
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
