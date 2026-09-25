@@ -1,0 +1,13 @@
+services:
+  bentopdf:
+    image: ghcr.io/alam00000/bentopdf-simple:latest
+    container_name: bentopdf
+    ports:
+      - '3000:8080'
+    networks:
+      - stacknet
+    restart: unless-stopped
+
+networks:
+  stacknet:
+    external: true
