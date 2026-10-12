@@ -1,0 +1,51 @@
+{
+    acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+}
+
+qbittorrent.home.insidemordecai.com {
+    reverse_proxy host.docker.internal:8080
+}
+
+homarr.home.insidemordecai.com {
+    reverse_proxy homarr:7575
+}
+
+jellyfin.home.insidemordecai.com {
+    reverse_proxy jellyfin:8096
+}
+
+radarr.home.insidemordecai.com {
+    reverse_proxy radarr:7878
+}
+
+sonarr.home.insidemordecai.com {
+    reverse_proxy sonarr:8989
+}
+
+seerr.home.insidemordecai.com {
+    reverse_proxy seerr:5055
+}
+
+prowlarr.home.insidemordecai.com {
+    reverse_proxy prowlarr:9696
+}
+
+trailarr.home.insidemordecai.com {
+    reverse_proxy trailarr:7889
+}
+
+cleanuparr.home.insidemordecai.com {
+    reverse_proxy cleanuparr:11011
+}
+
+bazarr.home.insidemordecai.com {
+    reverse_proxy bazarr:6767
+}
+
+abs.home.insidemordecai.com {
+    reverse_proxy audiobookshelf:80
+}
+
+pdf.home.insidemordecai.com {
+    reverse_proxy bentopdf:8080
+}
