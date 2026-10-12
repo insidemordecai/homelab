@@ -2,15 +2,15 @@
     acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 }
 
-qbittorrent.home.insidemordecai.com {
+qb.home.insidemordecai.com {
     reverse_proxy host.docker.internal:8080
 }
 
-homarr.home.insidemordecai.com {
+dash.home.insidemordecai.com {
     reverse_proxy homarr:7575
 }
 
-jellyfin.home.insidemordecai.com {
+media.home.insidemordecai.com {
     reverse_proxy jellyfin:8096
 }
 
