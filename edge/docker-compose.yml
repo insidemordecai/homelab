@@ -1,35 +1,33 @@
 services:
-  cloudflared:
-    image: cloudflare/cloudflared
-    container_name: cloudflared
-    environment:
-      - TZ=${TZ}
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    networks:
-      - stacknet 
+    cloudflared:
+        image: cloudflare/cloudflared
+        container_name: cloudflared
+        environment:
+            - TZ=${TZ}
+            - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+        restart: unless-stopped
+        command: tunnel --no-autoupdate run
+        networks:
+            - stacknet
 
-  caddy:
-    image: caddybuilds/caddy-cloudflare:latest
-    container_name: caddy
-    restart: unless-stopped
-    command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile --watch
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - ./caddy:/etc/caddy:ro
-      - ./appdata/caddy/data:/data
-      - ./appdata/caddy/config:/config
-    environment:
-      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - stacknet
+    caddy:
+        image: caddybuilds/caddy-cloudflare:latest
+        container_name: caddy
+        restart: unless-stopped
+        command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile --watch
+        ports:
+            - "80:80"
+            - "443:443"
+            - "443:443/udp"
+        volumes:
+            - ./caddy:/etc/caddy:ro
+            - ./appdata/caddy/data:/data
+            - ./appdata/caddy/config:/config
+        environment:
+            - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+        networks:
+            - stacknet
 
 networks:
-  stacknet:
-    external: true 
+    stacknet:
+        external: true

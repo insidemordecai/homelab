@@ -1,202 +1,197 @@
 ---
 services:
-  prowlarr:
-    image: lscr.io/linuxserver/prowlarr:latest
-    container_name: prowlarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
-    volumes:
-      - ./appdata/prowlarr:/config
-    ports:
-      - 9696:9696
-    networks:
-      - stacknet
-    restart: unless-stopped
+    qbittorrent:
+        image: lscr.io/linuxserver/qbittorrent:latest
+        container_name: qbittorrent
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=${TZ}
+            - WEBUI_PORT=8080
+            - TORRENTING_PORT=6881
+        volumes:
+            - ./appdata/qbittorrent:/config
+            - ${DATA_VOLUME}/data:/data
+        # Port 6881 TCP/UDP is forwarded on the router to this host.
+        # Do this to avoid the "Firewalled" issue and set it as the listening port in the qBittorrent settings.
+        ports:
+            - 8080:8080
+            - 6881:6881
+            - 6881:6881/udp
+        networks:
+            - stacknet
+        restart: unless-stopped
 
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    environment:
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - LOG_FILE=${LOG_FILE:-none}
-      - LOG_HTML=${LOG_HTML:-false}
-      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - TZ=${TZ}
-    ports:
-      - 8191:8191
-    volumes:
-      - /var/lib/flaresolver:/config
-    networks:
-      - stacknet
-    restart: unless-stopped
+    prowlarr:
+        image: lscr.io/linuxserver/prowlarr:latest
+        container_name: prowlarr
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=${TZ}
+        volumes:
+            - ./appdata/prowlarr:/config
+        ports:
+            - 9696:9696
+        networks:
+            - stacknet
+        restart: unless-stopped
 
-  radarr:
-    image: lscr.io/linuxserver/radarr:latest
-    container_name: radarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
-    volumes:
-      - ./appdata/radarr:/config
-      - ${DATA_VOLUME}/data:/data
-    ports: 
-      - 7878:7878
-    networks:
-      - stacknet
-    extra_hosts:
-      - "qbittorrent:172.17.0.1"  # allows use of 'qbittorrent' as hostname
-    restart: unless-stopped 
+    flaresolverr:
+        image: ghcr.io/flaresolverr/flaresolverr:latest
+        container_name: flaresolverr
+        environment:
+            - LOG_LEVEL=${LOG_LEVEL:-info}
+            - LOG_FILE=${LOG_FILE:-none}
+            - LOG_HTML=${LOG_HTML:-false}
+            - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+            - TZ=${TZ}
+        ports:
+            - 8191:8191
+        volumes:
+            - /var/lib/flaresolver:/config
+        networks:
+            - stacknet
+        restart: unless-stopped
 
-  sonarr:
-    image: lscr.io/linuxserver/sonarr:latest
-    container_name: sonarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
-    volumes:
-      - ./appdata/sonarr:/config
-      - ${DATA_VOLUME}/data:/data
-    ports:
-      - 8989:8989
-    networks:
-      - stacknet
-    extra_hosts:
-      - "qbittorrent:172.17.0.1"  # allows use of 'qbittorrent' as hostname
-    restart: unless-stopped
+    radarr:
+        image: lscr.io/linuxserver/radarr:latest
+        container_name: radarr
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=${TZ}
+        volumes:
+            - ./appdata/radarr:/config
+            - ${DATA_VOLUME}/data:/data
+        ports:
+            - 7878:7878
+        networks:
+            - stacknet
+        restart: unless-stopped
 
-  trailarr:
-    image: nandyalu/trailarr:latest
-    container_name: trailarr
-    environment:
-      - TZ=${TZ}
-    volumes:
-      - ./appdata/trailarr:/config # For Trailarr's database and logs
-      - ${DATA_VOLUME}/data:/data # Radarr & Sonarr map
-    ports:
-      - "7889:7889" # Or choose a different host port if 7889 is taken, leave the right side as is
-    networks:
-      - stacknet
-    restart: unless-stopped
+    sonarr:
+        image: lscr.io/linuxserver/sonarr:latest
+        container_name: sonarr
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=${TZ}
+        volumes:
+            - ./appdata/sonarr:/config
+            - ${DATA_VOLUME}/data:/data
+        ports:
+            - 8989:8989
+        networks:
+            - stacknet
+        restart: unless-stopped
 
-  cleanuparr:
-    image: ghcr.io/cleanuparr/cleanuparr:latest
-    container_name: cleanuparr
-    restart: unless-stopped
-    ports:
-      - "11011:11011"
-    volumes:
-      - ./appdata/cleanuparr:/config
-      - ${DATA_VOLUME}/data:/data
-    environment:
-      - PORT=11011
-      - BASE_PATH=
-      - PUID=1000
-      - PGID=1000
-      - UMASK=022
-      - TZ=${TZ}
-    networks:
-      - stacknet
-    extra_hosts:
-      - "qbittorrent:172.17.0.1"  # allows use of 'qbittorrent' as hostname
+    trailarr:
+        image: nandyalu/trailarr:latest
+        container_name: trailarr
+        environment:
+            - TZ=${TZ}
+        volumes:
+            - ./appdata/trailarr:/config # For Trailarr's database and logs
+            - ${DATA_VOLUME}/data:/data # Radarr & Sonarr map
+        ports:
+            - "7889:7889" # Or choose a different host port if 7889 is taken, leave the right side as is
+        networks:
+            - stacknet
+        restart: unless-stopped
 
-  bazarr:
-    image: lscr.io/linuxserver/bazarr:latest
-    container_name: bazarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
-    volumes:
-      - ./appdata/bazarr:/config
-      - ${DATA_VOLUME}/data:/data
-    ports:
-      - 6767:6767
-    networks:
-      - stacknet
-    restart: unless-stopped
+    cleanuparr:
+        image: ghcr.io/cleanuparr/cleanuparr:latest
+        container_name: cleanuparr
+        restart: unless-stopped
+        ports:
+            - "11011:11011"
+        volumes:
+            - ./appdata/cleanuparr:/config
+            - ${DATA_VOLUME}/data:/data
+        environment:
+            - PORT=11011
+            - BASE_PATH=
+            - PUID=1000
+            - PGID=1000
+            - UMASK=022
+            - TZ=${TZ}
+        networks:
+            - stacknet
 
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
-    container_name: qbittorrent
-    network_mode: host   # port 6881 is forwarded on the router to the host to avoid "Firewalled" issue thus container needs to be on host's network (EXERCISE CAUTION)
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=6881
-    volumes:
-      - ./appdata/qbittorrent:/config
-      - ${DATA_VOLUME}/data:/data
-    # ports:
-    #   - 8080:8080
-    #   - 6881:6881
-    #   - 6881:6881/udp
-    # networks:
-    #   - stacknet
-    restart: unless-stopped
+    bazarr:
+        image: lscr.io/linuxserver/bazarr:latest
+        container_name: bazarr
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=${TZ}
+        volumes:
+            - ./appdata/bazarr:/config
+            - ${DATA_VOLUME}/data:/data
+        ports:
+            - 6767:6767
+        networks:
+            - stacknet
+        restart: unless-stopped
 
-  jellyfin:
-    image: lscr.io/linuxserver/jellyfin:latest
-    container_name: jellyfin
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
-    volumes:
-      - ./appdata/jellyfin:/config
-      - ${DATA_VOLUME}/data:/data
-    ports:
-      - 8096:8096
-      - 8920:8920
-      - 7359:7359/udp
-      - 1900:1900/udp
-    networks:
-      - stacknet
-    restart: unless-stopped
+    jellyfin:
+        image: lscr.io/linuxserver/jellyfin:latest
+        container_name: jellyfin
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=${TZ}
+        volumes:
+            - ./appdata/jellyfin:/config
+            - ${DATA_VOLUME}/data:/data
+        ports:
+            - 8096:8096
+            - 8920:8920
+            - 7359:7359/udp
+            - 1900:1900/udp
+        networks:
+            - stacknet
+        restart: unless-stopped
 
-  seerr:
-    image: ghcr.io/seerr-team/seerr:latest
-    init: true
-    container_name: seerr
-    environment:
-      - LOG_LEVEL=debug
-      - PUID=1000
-      - PGID=1000
-      - TZ=${TZ}
-    volumes:
-      - ./appdata/seerr:/app/config
-    ports:
-      - 5055:5055
-    networks:
-      - stacknet
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
-      start_period: 20s
-      timeout: 3s
-      interval: 15s
-      retries: 3
-    restart: unless-stopped
+    seerr:
+        image: ghcr.io/seerr-team/seerr:latest
+        init: true
+        container_name: seerr
+        environment:
+            - LOG_LEVEL=debug
+            - PUID=1000
+            - PGID=1000
+            - TZ=${TZ}
+        volumes:
+            - ./appdata/seerr:/app/config
+        ports:
+            - 5055:5055
+        networks:
+            - stacknet
+        healthcheck:
+            test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+            start_period: 20s
+            timeout: 3s
+            interval: 15s
+            retries: 3
+        restart: unless-stopped
 
-  audiobookshelf:
-    image: ghcr.io/advplyr/audiobookshelf:latest
-    container_name: audiobookshelf
-    ports:
-      - 13378:80
-    volumes:
-      - ./appdata/audiobookshelf:/config
-      - ./appdata/audiobookshelf/metadata:/metadata
-      - ${DATA_VOLUME}/data:/data
-    environment:
-      - TZ=${TZ}
-    networks:
-      - stacknet
-    restart: unless-stopped
+    audiobookshelf:
+        image: ghcr.io/advplyr/audiobookshelf:latest
+        container_name: audiobookshelf
+        ports:
+            - 13378:80
+        volumes:
+            - ./appdata/audiobookshelf:/config
+            - ./appdata/audiobookshelf/metadata:/metadata
+            - ${DATA_VOLUME}/data:/data
+        environment:
+            - TZ=${TZ}
+        networks:
+            - stacknet
+        restart: unless-stopped
 
 networks:
-  stacknet:
-    external: true
+    stacknet:
+        external: true

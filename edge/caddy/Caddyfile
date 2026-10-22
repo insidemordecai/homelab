@@ -3,7 +3,7 @@
 }
 
 qb.home.insidemordecai.com {
-    reverse_proxy host.docker.internal:8080
+    reverse_proxy qbittorrent:8080
 }
 
 dash.home.insidemordecai.com {
