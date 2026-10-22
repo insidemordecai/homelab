@@ -11,17 +11,17 @@ by name.
 - [Repository Structure](#repository-structure)
 - [Prerequisites](#prerequisites)
 - [Setup](#setup)
-  - [Clone the Repository](#clone-the-repository)
-  - [Create the .env Files](#create-the-env-files)
-  - [Docker Permissions](#docker-permissions)
-  - [Data Ownership](#data-ownership)
-  - [Create the Shared Network](#create-the-shared-network)
-  - [Deploy a Stack](#deploy-a-stack)
+    - [Clone the Repository](#clone-the-repository)
+    - [Create the .env Files](#create-the-env-files)
+    - [Docker Permissions](#docker-permissions)
+    - [Data Ownership](#data-ownership)
+    - [Create the Shared Network](#create-the-shared-network)
+    - [Deploy a Stack](#deploy-a-stack)
 - [Stacks](#stacks)
-  - [Edge](#edge)
-  - [Dashboard](#dashboard)
-  - [Media](#media)
-  - [Utilities](#utilities)
+    - [Edge](#edge)
+    - [Dashboard](#dashboard)
+    - [Media](#media)
+    - [Utilities](#utilities)
 - [Accessing Services](#accessing-services)
 - [Security Notes](#security-notes)
 - [Useful Links](#useful-links)
@@ -57,7 +57,7 @@ Every stack follows the same basic shape:
 ### Clone the Repository
 
 ```shell
-git clone https://github.com/insidemordecai/homelab.git
+git clone git@github.com:insidemordecai/homelab.git
 cd homelab
 ```
 
@@ -118,10 +118,10 @@ Public entry point and TLS termination. Cloudflare Tunnel exposes services
 without opening inbound ports on the router, and Caddy reverse-proxies requests
 to containers on `stacknet`.
 
-| Application | Role | Port(s) |
-| --- | --- | --- |
-| [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) (`cloudflared`) | Outbound-only tunnel to Cloudflare | — |
-| [Caddy](https://caddyserver.com/) | Reverse proxy with automatic HTTPS via Cloudflare DNS | `80`, `443` |
+| Application                                                                                                         | Role                                                  | Port(s)     |
+| ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------- |
+| [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) (`cloudflared`) | Outbound-only tunnel to Cloudflare                    | —           |
+| [Caddy](https://caddyserver.com/)                                                                                   | Reverse proxy with automatic HTTPS via Cloudflare DNS | `80`, `443` |
 
 Caddy routes are defined in [`edge/caddy/Caddyfile`](edge/caddy/Caddyfile) and
 point at container names such as `jellyfin:8096`. See the
@@ -129,8 +129,8 @@ point at container names such as `jellyfin:8096`. See the
 
 ### Dashboard
 
-| Application | Role | Port |
-| --- | --- | --- |
+| Application                   | Role                                                                | Port   |
+| ----------------------------- | ------------------------------------------------------------------- | ------ |
 | [Homarr](https://homarr.dev/) | Customizable dashboard and service launcher with Docker integration | `7575` |
 
 The Docker socket is mounted so Homarr can show container status. Generate the
@@ -142,19 +142,19 @@ Media servers, download clients, and automation. All applications share the
 same data volume (`${DATA_VOLUME}/data:/data`) so downloads and libraries stay
 consistent across containers.
 
-| Application | Role | Port |
-| --- | --- | --- |
-| [qBittorrent](https://www.qbittorrent.org/) | Torrent download client | `8080` |
-| [Prowlarr](https://prowlarr.com/) | Indexer manager for the Arr apps | `9696` |
-| [Flaresolverr](https://github.com/FlareSolverr/FlareSolverr) | Cloudflare challenge bypass for indexers | `8191` |
-| [Radarr](https://radarr.video/) | Movie collection manager | `7878` |
-| [Sonarr](https://sonarr.tv/) | TV series collection manager | `8989` |
-| [Trailarr](https://github.com/nandyalu/trailarr) | Downloads movie and show trailers | `7889` |
-| [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr) | Cleans up stalled or unwanted downloads | `11011` |
-| [Bazarr](https://www.bazarr.media/) | Subtitle management for Radarr and Sonarr | `6767` |
-| [Jellyfin](https://jellyfin.org/) | Media server and streaming frontend | `8096` |
-| [Seerr](https://github.com/seerr-team/seerr) | Media request portal for users | `5055` |
-| [Audiobookshelf](https://www.audiobookshelf.org/) | Audiobook and podcast server | `13378` |
+| Application                                                  | Role                                      | Port    |
+| ------------------------------------------------------------ | ----------------------------------------- | ------- |
+| [qBittorrent](https://www.qbittorrent.org/)                  | Torrent download client                   | `8080`  |
+| [Prowlarr](https://prowlarr.com/)                            | Indexer manager for the Arr apps          | `9696`  |
+| [Flaresolverr](https://github.com/FlareSolverr/FlareSolverr) | Cloudflare challenge bypass for indexers  | `8191`  |
+| [Radarr](https://radarr.video/)                              | Movie collection manager                  | `7878`  |
+| [Sonarr](https://sonarr.tv/)                                 | TV series collection manager              | `8989`  |
+| [Trailarr](https://github.com/nandyalu/trailarr)             | Downloads movie and show trailers         | `7889`  |
+| [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr)       | Cleans up stalled or unwanted downloads   | `11011` |
+| [Bazarr](https://www.bazarr.media/)                          | Subtitle management for Radarr and Sonarr | `6767`  |
+| [Jellyfin](https://jellyfin.org/)                            | Media server and streaming frontend       | `8096`  |
+| [Seerr](https://github.com/seerr-team/seerr)                 | Media request portal for users            | `5055`  |
+| [Audiobookshelf](https://www.audiobookshelf.org/)            | Audiobook and podcast server              | `13378` |
 
 Jellyfin also exposes `8920` (HTTPS), `7359/udp` (client discovery), and
 `1900/udp` (DLNA). qBittorrent exposes `6881` TCP/UDP for torrent traffic; that
@@ -183,8 +183,8 @@ Configuration and per-app setup steps are documented in the
 
 ### Utilities
 
-| Application | Role | Port |
-| --- | --- | --- |
+| Application                                       | Role                                             | Port   |
+| ------------------------------------------------- | ------------------------------------------------ | ------ |
 | [BentoPDF](https://github.com/alam00000/bentopdf) | Browser-based PDF editing and conversion toolkit | `3000` |
 
 ## Accessing Services
@@ -220,4 +220,3 @@ example `https://media.example.com`.
 - [Servarr Wiki](https://wiki.servarr.com/)
 - [TRaSH Guides](https://trash-guides.info/)
 - [Homarr documentation](https://homarr.dev/docs/)
-
