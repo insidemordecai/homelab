@@ -15,6 +15,8 @@ Each stack lives in its own directory, ships with a `.env.example` template, and
     - [Data Ownership](#data-ownership)
     - [Create the Shared Network](#create-the-shared-network)
     - [Deploy a Stack](#deploy-a-stack)
+    - [Update a Stack](#update-a-stack)
+    - [Common Commands](#common-commands)
 - [Stacks](#stacks)
     - [Edge](#edge)
     - [Dashboard](#dashboard)
@@ -28,7 +30,7 @@ Each stack lives in its own directory, ships with a `.env.example` template, and
 
 ```text
 homelab
-├── dashboard/          # Homarr dashboard
+├── dashboard/          # Dashboard applications
 ├── edge/               # Cloudflare Tunnel + Caddy reverse proxy
 ├── media/              # Media servers, downloaders, and automation
 ├── utilities/          # Small standalone tools
@@ -101,10 +103,39 @@ docker network create stacknet
 From the directory containing the `docker-compose.yml` file:
 
 ```shell
-docker compose up -d    # deploy containers
-docker compose stop     # stop containers
-docker compose rm       # remove containers (stop them first)
+docker compose up -d
 ```
+
+### Update a Stack
+
+Pull the latest images and recreate containers in one command:
+
+```shell
+docker compose up -d --pull always
+```
+
+To update a single service, pull and recreate it separately:
+
+```shell
+docker compose pull <service>
+docker compose up -d <service>
+```
+
+### Common Commands
+
+Use the service name from the `services:` section as `<service>`.
+
+| Task                             | Command                                          |
+| -------------------------------- | ------------------------------------------------ |
+| List running services            | `docker compose ps`                              |
+| View logs for a service          | `docker compose logs -f <service>`               |
+| Stop a service                   | `docker compose stop <service>`                  |
+| Start a stopped service          | `docker compose start <service>`                 |
+| Restart a service                | `docker compose restart <service>`               |
+| Force-recreate a service         | `docker compose up -d --force-recreate <service>` |
+| Stop and remove the stack        | `docker compose down`                            |
+
+`docker compose down` removes the containers and network but leaves named volumes and bind-mounted data in place.
 
 ## Stacks
 
@@ -159,6 +190,8 @@ Configuration and per-app setup steps are documented in the [Media README](media
 | Application                                       | Role                                             | Port   |
 | ------------------------------------------------- | ------------------------------------------------ | ------ |
 | [BentoPDF](https://github.com/alam00000/bentopdf) | Browser-based PDF editing and conversion toolkit | `3000` |
+
+See the [Utilities README](utilities/README.md) for setup and configuration.
 
 ## Accessing Services
 
