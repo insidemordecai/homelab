@@ -22,6 +22,7 @@ by name.
   - [Dashboard](#dashboard)
   - [Media](#media)
   - [Utilities](#utilities)
+- [Accessing Services](#accessing-services)
 - [Security Notes](#security-notes)
 - [Useful Links](#useful-links)
 
@@ -186,7 +187,7 @@ Configuration and per-app setup steps are documented in the
 | --- | --- | --- |
 | [BentoPDF](https://github.com/alam00000/bentopdf) | Browser-based PDF editing and conversion toolkit | `3000` |
 
-### Accessing Services
+## Accessing Services
 
 By default, published ports are reachable at `http://localhost:<port>` on the
 Docker host. When deployed behind the Edge stack, services are instead reached
