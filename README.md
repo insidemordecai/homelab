@@ -2,9 +2,7 @@
 
 Docker Compose stacks and notes for running my self-hosted services.
 
-Each stack lives in its own directory, ships with a `.env.example` template, and
-joins the shared external `stacknet` network so containers can reach each other
-by name.
+Each stack lives in its own directory, ships with a `.env.example` template, and joins the shared external `stacknet` network so containers can reach each other by name.
 
 ## Table of Contents
 
@@ -63,20 +61,19 @@ cd homelab
 
 ### Create the .env Files
 
-Each stack reads its configuration from a local `.env` file. Copy every
-`.env.example` template in the repository to `.env` in the same directory with:
+Each stack reads its configuration from a local `.env` file.
+Copy every `.env.example` template in the repository to `.env` in the same directory with:
 
 ```shell
 find . -name '.env.example' -execdir cp .env.example .env \;
 ```
 
-Then edit each `.env` and fill in the values for your environment. The `.env`
-files are ignored by Git, so your local values will not be committed.
+Then edit each `.env` and fill in the values for your environment.
+The `.env` files are ignored by Git, so your local values will not be committed.
 
 ### Docker Permissions
 
-Add your user to the `docker` group so you do not need to prepend `sudo` to
-every Docker command:
+Add your user to the `docker` group so you do not need to prepend `sudo` to every Docker command:
 
 ```shell
 sudo usermod -aG docker $USER
@@ -85,8 +82,7 @@ newgrp docker # reload group permissions immediately
 
 ### Data Ownership
 
-Change ownership of the data volume referenced in the `.env` files so the
-containers (which typically run as UID/GID `1000`) can read and write it:
+Change ownership of the data volume referenced in the `.env` files so the containers (which typically run as UID/GID `1000`) can read and write it:
 
 ```shell
 chown -R 1000:1000 /path/to/your/data/volume
@@ -114,18 +110,20 @@ docker compose rm       # remove containers (stop them first)
 
 ### Edge
 
-Public entry point and TLS termination. Cloudflare Tunnel exposes services
-without opening inbound ports on the router, and Caddy reverse-proxies requests
-to containers on `stacknet`.
+Edge provides the ingress layer for services running on the host, both inside a [Tailscale](https://tailscale.com/) tailnet and, for selected services, on the public internet.
+
+Most services are only reachable from devices on the tailnet, while Cloudflare Tunnel exposes selected services publicly without opening inbound ports on the router.
+
+Caddy reverse-proxies incoming requests to containers on `stacknet`.
 
 | Application                                                                                                         | Role                                                  | Port(s)     |
 | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------- |
-| [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) (`cloudflared`) | Outbound-only tunnel to Cloudflare                    | —           |
+| [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) (`cloudflared`) | Exposes selected services publicly                    | —           |
 | [Caddy](https://caddyserver.com/)                                                                                   | Reverse proxy with automatic HTTPS via Cloudflare DNS | `80`, `443` |
 
-Caddy routes are defined in [`edge/caddy/Caddyfile`](edge/caddy/Caddyfile) and
-point at container names such as `jellyfin:8096`. See the
-[Edge README](edge/README.md) for tunnel setup.
+Caddy routes are defined in [`edge/caddy/Caddyfile`](edge/caddy/Caddyfile) and point at container names such as `jellyfin:8096`.
+
+See the [Edge README](edge/README.md) for the setup.
 
 ### Dashboard
 
@@ -133,14 +131,13 @@ point at container names such as `jellyfin:8096`. See the
 | ----------------------------- | ------------------------------------------------------------------- | ------ |
 | [Homarr](https://homarr.dev/) | Customizable dashboard and service launcher with Docker integration | `7575` |
 
-The Docker socket is mounted so Homarr can show container status. Generate the
-required encryption key with `openssl rand -hex 32` and add it to the `.env`.
+The Docker socket is mounted so Homarr can show container status.
+Generate the required encryption key with `openssl rand -hex 32` and add it to the `.env`.
 
 ### Media
 
-Media servers, download clients, and automation. All applications share the
-same data volume (`${DATA_VOLUME}/data:/data`) so downloads and libraries stay
-consistent across containers.
+Media servers, download clients, and automation.
+All applications share the same data volume (`${DATA_VOLUME}/data:/data`) so downloads and libraries stay consistent across containers.
 
 | Application                                                  | Role                                      | Port    |
 | ------------------------------------------------------------ | ----------------------------------------- | ------- |
@@ -156,30 +153,7 @@ consistent across containers.
 | [Seerr](https://github.com/seerr-team/seerr)                 | Media request portal for users            | `5055`  |
 | [Audiobookshelf](https://www.audiobookshelf.org/)            | Audiobook and podcast server              | `13378` |
 
-Jellyfin also exposes `8920` (HTTPS), `7359/udp` (client discovery), and
-`1900/udp` (DLNA). qBittorrent exposes `6881` TCP/UDP for torrent traffic; that
-port should be forwarded on the router to avoid being firewalled.
-
-The media data layout is expected to look like this:
-
-```text
-data
-├── torrents
-│   ├── completed
-│   └── incomplete
-└── media
-    ├── movies
-    └── tv
-```
-
-Create it with:
-
-```shell
-mkdir -p torrents/{completed,incomplete} && mkdir -p media/{movies,tv}
-```
-
-Configuration and per-app setup steps are documented in the
-[Media README](media/README.md).
+Configuration and per-app setup steps are documented in the [Media README](media/README.md).
 
 ### Utilities
 
@@ -189,25 +163,21 @@ Configuration and per-app setup steps are documented in the
 
 ## Accessing Services
 
-By default, published ports are reachable at `http://localhost:<port>` on the
-Docker host. When deployed behind the Edge stack, services are instead reached
-through Caddy using hostnames you configure in `edge/caddy/Caddyfile`, for
-example `https://media.example.com`.
+Published ports are reachable at `http://localhost:<port>` on the Docker host.
+
+From other devices, services are normally reached through Tailscale using the host's tailnet IP or MagicDNS name.
+
+Selected services are exposed publicly through Cloudflare Tunnel or reverse-proxied safely through Tailscale using Caddy and Cloudflare (not Tunnel – check [this video for Tailscale inspiration](https://youtu.be/Vt4PDUXB_fg)) using hostnames configured in `edge/caddy/Caddyfile`, for example `https://media.example.com`.
 
 ## Security Notes
 
 > [!CAUTION]
-> `.env` files are ignored by Git, but be careful. Do NOT commit or push your
-> local `.env` files, as they contain tokens, encryption keys, and other
-> credentials.
+> `.env` files are ignored by Git, but be careful: do NOT commit or push your local `.env` files, as they contain tokens, encryption keys, and other credentials.
 
-- Keep real values out of `.env.example`; use obvious placeholders such as
-  `pasteYourTokenHere`.
+- Keep real values out of `.env.example` and use obvious placeholders such as `pasteYourTokenHere`.
 - Do not expose a service to the internet until it has authentication enabled.
-- Only open firewall ports that you actually need. qBittorrent's listening port
-  (`6881`) is a common exception; see the [Media README](media/README.md#firewall).
-- Back up application configuration (`appdata/`) and media libraries before
-  updating stateful services or changing volume mappings.
+- Only open firewall ports that you actually need; qBittorrent's torrent port is covered in the [Media README](media/README.md#firewall).
+- Back up application configuration (`appdata/`) and media libraries before updating stateful services or changing volume mappings.
 
 ## Useful Links
 
@@ -220,3 +190,4 @@ example `https://media.example.com`.
 - [Servarr Wiki](https://wiki.servarr.com/)
 - [TRaSH Guides](https://trash-guides.info/)
 - [Homarr documentation](https://homarr.dev/docs/)
+- [Tailscale documentation](https://tailscale.com/kb)
