@@ -131,8 +131,7 @@ See the [Edge README](edge/README.md) for the setup.
 | ----------------------------- | ------------------------------------------------------------------- | ------ |
 | [Homarr](https://homarr.dev/) | Customizable dashboard and service launcher with Docker integration | `7575` |
 
-The Docker socket is mounted so Homarr can show container status.
-Generate the required encryption key with `openssl rand -hex 32` and add it to the `.env`.
+See the [Dashboard README](dashboard/README.md) for setup and configuration.
 
 ### Media
 
