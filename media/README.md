@@ -1,237 +1,228 @@
-# Media Server and Aggregation
-This setup is based on Docker to install media servers and aggregators for easy sourcing of files and streaming. 
+# Media Stack
+
+This stack runs the media servers, download clients, and automation for the homelab.
+
 ## Table of Contents
-- [Prerequisite](#prerequisite)
-- [Setup Process](#setup-process)
-  - [Folder Mapping](#folder-mapping)
-  - [Step 0](#step-0)
-  - [qBittorrent](#qbittorrent)
-  - [Arr Apps](#arr-apps)
+
+- [Services](#services)
+- [Setup](#setup)
+    - [Environment](#environment)
+    - [Folder Mapping](#folder-mapping)
+- [Applications](#applications)
+    - [qBittorrent](#qbittorrent)
     - [Prowlarr](#prowlarr)
     - [Flaresolverr](#flaresolverr)
     - [Radarr](#radarr)
     - [Sonarr](#sonarr)
     - [Bazarr](#bazarr)
-  - [Jellyfin](#jellyfin)
-  - [Seerr](#seerr)
+    - [Jellyfin](#jellyfin)
+    - [Seerr](#seerr)
+    - [Trailarr](#trailarr)
+    - [Cleanuparr](#cleanuparr)
+    - [Audiobookshelf](#audiobookshelf)
 - [Firewall](#firewall)
-- [Useful Links](#useful-links)
-## Prerequisite 
-You need to have these installed: 
-- [Docker](https://docs.docker.com/engine/install/) 
-- [Docker Compose](https://docs.docker.com/compose/install/)
-## Setup Process
-### Folder Mapping 
-At a high level, all the files will be under `/data` on our hard drive. 
-This is my current setup:
-```
+
+## Services
+
+| Application                                                  | Role                                      | Port    |
+| ------------------------------------------------------------ | ----------------------------------------- | ------- |
+| [qBittorrent](https://www.qbittorrent.org/)                  | Torrent download client                   | `8080`  |
+| [Prowlarr](https://prowlarr.com/)                            | Indexer manager for the Arr apps          | `9696`  |
+| [Flaresolverr](https://github.com/FlareSolverr/FlareSolverr) | Cloudflare challenge bypass for indexers  | `8191`  |
+| [Radarr](https://radarr.video/)                              | Movie collection manager                  | `7878`  |
+| [Sonarr](https://sonarr.tv/)                                 | TV series collection manager              | `8989`  |
+| [Bazarr](https://www.bazarr.media/)                          | Subtitle management for Radarr and Sonarr | `6767`  |
+| [Jellyfin](https://jellyfin.org/)                            | Media server and streaming frontend       | `8096`  |
+| [Seerr](https://github.com/seerr-team/seerr)                 | Media request portal for users            | `5055`  |
+| [Trailarr](https://github.com/nandyalu/trailarr)             | Downloads movie and show trailers         | `7889`  |
+| [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr)       | Cleans up stalled or unwanted downloads   | `11011` |
+| [Audiobookshelf](https://www.audiobookshelf.org/)            | Audiobook and podcast server              | `13378` |
+
+## Setup
+
+### Environment
+
+Set the stack-specific values in `.env` before deploying.
+
+| Variable      | Purpose                                                             |
+| ------------- | ------------------------------------------------------------------- |
+| `TZ`          | Timezone used by all containers, for example `Africa/Nairobi`       |
+| `DATA_VOLUME` | Host directory that holds the `data` folder for media and downloads |
+
+See the root README for the shared setup, network, and deployment steps.
+
+### Folder Mapping
+
+The stack expects media and torrents to live under `${DATA_VOLUME}/data`.
+Create the directories before deploying:
+
+```text
 data
 ├── torrents
-│   ├── completed
-│   └── incomplete
+│   ├── completed
+│   └── incomplete
 └── media
-    ├── movies
-    └── tv
+    ├── movies
+    ├── tv
+    ├── audiobooks
+    └── podcasts
 ```
 
-Create your directories before proceeding. 
-Here's an easy command to run in your `/data` directory if you want a similar directory scheme.
 ```shell
-mkdir -p torrents/{completed,incomplete} && mkdir -p media/{movies,tv}
+mkdir -p torrents/{completed,incomplete} && mkdir -p media/{movies,tv,audiobooks,podcasts}
 ```
-### Step 0
-- Clone this repository or download a zip of it.
-- In the root directory, run this command to copy all `.env.example` templates as `.env` in each subdirectory for you to edit.
-```shell
-find . -name '.env.example' -execdir cp .env.example .env \;
-```
-- Navigate to the directory with the `docker-compose.yml` file. 
-- Add your user to the `docker` group to not have to prepend `sudo` to each docker command.
-```shell
-sudo usermod -aG docker $USER
-newgrp docker # reload group permissions immediately
-```
-- Change ownership of the data volume specified in the `.env` file to allow all services to have access to directories mapped to them. 
-```shell
-chown -R 1000:1000 /data/volume/in/.env/file
-```
-- Create the `stacknet` network. 
-```shell
-docker network create stacknet
-```
-- Edit the `.env` files and use the following commands with Docker. 
-```shell
-docker compose up -d # to deploy containers
-docker compose stop # to stop containers 
-docker compose rm # to remove containers (stop container first)
-```
-- Configure the different apps now.
 
-> [!CAUTION]
-> `.env` files are ignored but be careful.
-> Do NOT commit or push the changes you make to the `.env` files to avoid sharing your tokens.
+## Applications
+
 ### qBittorrent
-http://localhost:8080
 
-Launch qBittorrent and enter its credentials. 
-The username is `admin` while the password is randomly generated on launch.
-To find this password you can view the logs: 
+Open qBittorrent from the port in the services table.
+Log in with the username `admin` and the temporary password from the container logs:
+
 ```shell
 docker logs qbittorrent
 ```
-Now, head into settings and change the credentials under *Web UI → Authentication*.
 
-Configure qBittorrent to you liking, I personally prefer to: 
-- *Web UI → Authentication*
-	- Bypass authentication for clients on localhost 
-	- Change 'Ban client after consecutive failures' to 0 - at some point it used to stall out torrents but exercise caution with this especially if the download client is exposed to the internet 
-- *Downloads → Saving Management*
-	- Default save path: `/data/torrents/completed` 
-	- Keep incomplete torrents in: `/data/torrents/incomplete`
-	- Switch to Automatic torrent management 
-- *Connections → Listening Port*
-	- Match the port with what you have forwarded from your router.
-- *BitTorrent*
-	- Configure Torrent Queueing to your preference.
-	- Set up Seeding Limits
+Change the credentials under *Web UI → Authentication*.
 
-### Arr Apps
-#### Prowlarr 
-http://localhost:9696
+Recommended qBittorrent settings:
 
-Head to *Settings → Download Clients*, click on the `+` symbol and add qBittorrent.
+- *Web UI → Authentication*: bypass authentication for clients on localhost and change "Ban client after consecutive failures" to `0` if torrents stall, but use caution if the Web UI is exposed to the internet.
+- *Downloads → Saving Management*: set the default save path to `/data/torrents/completed` and keep incomplete torrents in `/data/torrents/incomplete`.
+- *Downloads → Saving Management*: switch to automatic torrent management.
+- *Connections → Listening Port*: match the port forwarded on the router.
+- *BitTorrent*: configure torrent queueing and seeding limits to your preference.
 
-Match the port with what is set on qBittorrent's Web UI (default is 8080) and add in qBittorrent's username and password. 
+### Prowlarr
 
-For 'Host', you can have it as `qbittorrent` if 
+Open Prowlarr from the port in the services table.
+Go to *Settings → Download Clients*, add qBittorrent with `qbittorrent` as the host and qBittorrent's credentials, then test and save.
+Add the indexers you want under *Indexers*, test them, and save.
 
-Test and save.
+### Flaresolverr
 
-Now add the indexers you want, test and save.
-#### Flaresolverr
-Flaresolverr doesn't require any configuration itself. 
+Flaresolverr does not require any configuration itself.
+In Prowlarr, go to *Settings → Indexers*, add Flaresolverr with the tag `flaresolverr` and `http://flaresolverr:8191/` as the host, then test and save.
+Add the `flaresolverr` tag to any indexer that needs to bypass Cloudflare.
 
-Go to Prowlarr and head to *Settings → Indexers*, click on the `+` symbol and add Flaresolverr. 
-Give it a name, have the tag as `flaresolverr` and host should be `http://flaresolverr:8191/`.
-Test and save. 
+### Radarr
 
-Now any problematic indexer in Prowlarr should bypass Cloudflare, simply search for the indexer and add the tag `flaresolverr` to it.
+Open Radarr from the port in the services table.
+Under *Settings → Media Management*, add `/data/media/movies` as a root folder.
+Under *Settings → Download Clients*, add qBittorrent with `qbittorrent` as the host and qBittorrent's credentials.
 
-#### Radarr 
-http://localhost:7878
+Because Radarr and qBittorrent use the same `/data` mount, no remote path mapping is needed.
 
-Head to *Settings → Media Management*, add Root Folder and set it `/data/media/movies`. 
-Should be under `/data` in line with the `docker-compose.yml`, match what is on the right side of the volume configuration. 
+Copy the API key from *Settings → General*.
+In Prowlarr, go to *Settings → Apps*, add Radarr, paste the API key, and use `http://radarr:7878` as the server address, then test and save.
 
-Go to *Settings → Download Clients*, click on the `+` symbol and add qBittorrent (similar steps to Prowlarr above), test and save. 
+Optional Radarr tweaks:
 
-Still under *Download Clients*, configure Remote Path Mapping.
-Leave host as `localhost` and set your remote path according to your `docker-compose.yml`.
-In this case our volume is `${DATA_VOLUME}/data:/data` so we will map it like this:
-- Remote path: `/WHERE_YOUR_DATA_VOLUME_IS/data/torrents/completed` 
-- Local path: `/data/torrents/completed`
+- *Media Management*: enable "Unmonitor Deleted Movies".
+- *Media Management*: with advanced settings shown, set "Proper and Repacks" to "Do Not Prefer" so custom format scores drive selection.
+- *Media Management*: follow the [Jellyfin movie naming scheme](https://jellyfin.org/docs/general/server/media/movies) for the movie folder format, including the IMDb external ID.
+- *Custom Formats*: create formats for file size, x264, and x265 preferences.
+- *Custom Formats*: import Repack/Proper from the [TRaSH Guides collection](https://trash-guides.info/Radarr/Radarr-collection-of-custom-formats/#repackproper).
+- *Profiles*: uncheck Remux qualities if file size matters and score your custom formats so the preferred releases win.
 
-Go to *Settings→ General*, scroll down to API key and copy it.
-Go to Prowlarr then *Settings → Apps*, click on the `+` , add Radarr  and paste the API key.
-Change the Prowlarr and Radarr server address to match this format: `http://container-name:port`.
-Test and save. 
+### Sonarr
 
-That's the main steps, now you can tweak Radarr to your liking. 
-I personally like to:
-- *Media Management*:
-	- Check 'Unmonitor Delete Movies' 
-	- Show Advanced and change 'Proper and Repacks' to 'Do Not Prefer', this will use our custom formats scoring to pick the preferred media.
-	- Show Advanced and change 'Movie Folder Format'. I typically add IMDb external ID inline with [Jellyfin Movies naming scheme](https://jellyfin.org/docs/general/server/media/movies).
-- Add a few custom formats under *Custom Formats* 
-	- Medium File Size - set you minimum and max file size for media downloaded and check 'Required'. You can create another for Small and Large file sizes if you desire.
-	- x264 - use preset under 'Release Title' and check 'Required' to find files encoded with H.264.
-	- x265 - use preset under 'Release Title' and check 'Required' to find files encoded with H.265. 
-	- Repack/Proper - import from [TRaSH Guide's Collection](https://trash-guides.info/Radarr/Radarr-collection-of-custom-formats/#repackproper) to allow Radarr to still pick repacks/proper files. 
-- Tweak different quality profiles under *Profiles*
-	- Uncheck Remux since they tend to be large files.
-	- Set the score for the custom formats created e.g 1000 for Medium File Size, and 1 for Repack/Proper. You can also score x264 and x265 depending on your preference. and your media player's codec support.
-#### Sonarr
-http://localhost:8989
+Open Sonarr from the port in the services table.
+Under *Settings → Media Management*, add `/data/media/tv` as a root folder.
+Under *Settings → Download Clients*, add qBittorrent with the same settings used in Radarr.
 
-Sonarr setup is very similar to Radarr so this should be straightforward. 
+Because Sonarr and qBittorrent use the same `/data` mount, no remote path mapping is needed.
 
-Head to *Settings → Media Management*, add Root Folder and set it `/data/media/tv`. 
+Copy the API key from *Settings → General*.
+In Prowlarr, go to *Settings → Apps*, add Sonarr, paste the API key, and use `http://sonarr:8989` as the server address, then test and save.
 
-Go to *Settings → Download Clients*, click on the `+` symbol, add qBittorrent and repeat the same steps as Radarr above. 
+Apply the Radarr tweaks where they apply and also enable "Rename Episodes" under *Media Management*.
+Follow the [Jellyfin TV naming scheme](https://jellyfin.org/docs/general/server/media/shows) for the series folder format.
 
-Still under *Download Clients*, configure Remote Path Mapping.
-- Leave host as `localhost`
-- Remote path: `/WHERE_YOUR_DATA_VOLUME_IS/data/torrents/completed` 
-- Local path: `/data/torrents/completed`
+### Bazarr
 
-Go to *Settings→ General*, scroll down to API key and copy it.
-Go to Prowlarr then *Settings → Apps*, click on the `+` , add Sonarr  and paste the API key.
-Change the Prowlarr and Sonarr server address to match this format: `http://container-name:port`.
-Test and save.
+Open Bazarr from the port in the services table.
+Under *Settings → Sonarr*, enable the integration, fill in the Sonarr server details, test, and save.
+Under *Settings → Radarr*, enable the integration, fill in the Radarr server details, test, and save.
 
-For tweaks to Sonarr settings, look at Radarr's tweaks as they are similar.
-One major difference to account for is:
-- *Media Management*
-	- Follow [Jellyfin TV Shows naming scheme](https://jellyfin.org/docs/general/server/media/shows) to add IMDb external ID to the 'Series Folder Format'.
- 	- Check 'Rename Episodes'.
-#### Bazarr
-http://localhost:6767
+Under *Settings → Languages*, choose a language filter, create a language profile, and set it as the default for movies and series.
+Under *Settings → Providers*, add one or more subtitle providers and save.
+Some providers require an account, while others such as Podnapisi, Supersubtitles, and TVSubtitles do not.
 
-Head into *Settings → Sonarr* and enable it. 
-Fill in your Sonarr server details and test. 
-Set the minimum score in *Options* (TRaSH-Guide recommend `90`) and save your settings. 
+Under *Settings → Subtitles*, adjust embedded subtitle handling if your players have trouble with PGS or ASS subtitles.
+Under *Audio Synchronization / Alignment*, enable automatic subtitle audio synchronization and set thresholds such as `96` for series and `86` for movies.
 
-Repeat the same steps for Radarr by heading into *Settings → Radarr* and enable it. 
-Fill in your Radarr server details and test.
-Set the minimum score to `80` and save your settings.
-
-Now go to *Settings → Languages*. 
-Pick your desired language in the 'Language Filter'. 
-Under *Language Profiles*, select 'Add New Profile' and give it a name.
-Click on `Add` to add the language(s) you enabled earlier and configure the other options.
-Under *Default Language Profiles For Newly Added Shows*, enable 'Series' and 'Movies' and pick the profile you created.
-Save your settings. 
-
-Go to *Settings → Providers* and click on the `+` symbol to add your subtitle provider. 
-You will be required to enter you credentials for these providers such as [opensubtitles.com](https://opensubtitles.com), therefore, create an account with your desired provider first.
-Some that will not require you to create an account include: Podnapisi, Supersubtitles and TVSubtitles.
-Save your settings. 
-
-Under *Settings → Subtitles*, scroll to *Embedded Subtitles Handling*. 
-You might prefer to enable 'Ignore Embedded PGS Subtitles' and 'Ignore Embedded ASS Subtitles' if your media players have issues with these type of subtitles. 
-For example, Jellyfin for Samsung TV (check out [Jellyfin 2 Samsung](https://github.com/PatrickSt1991/Samsung-Jellyfin-Installer) and [Install Jellyfin Tizen](https://github.com/Georift/install-jellyfin-tizen) for how to sideload the app) attempts to transcode when selecting PGS subtitles but just never plays. 
-Scroll to *Audio Synchronization / Alignment* and enable 'Automatic Subtitles Audio Synchronization'. 
-Set the 'Score Threshold For Audio Sync' as `96` for Series and `86` for Movies. 
-Save your settings
-That's it, you can follow the tweaks made in Radarr in Sonarr as well. 
 ### Jellyfin
-http://localhost:8096 
 
-Configure Jellyfin on your browser and add your media library with matching folders as what is in the `docker-compose.yml` file. 
-That is `/data/media/movies` and `data/media/tv` in our case
-### Seerr 
-http://localhost:5055
+Open Jellyfin from the port in the services table.
+Complete the first-run wizard and create an admin account.
 
-Open Seerr and follow the on-screen guide.
-- Enter the Jellyfin hostname `jellyfin` and leave the port as is unless you had changed this. 
-- Test and save. API keys will be configured automatically.
-- Add Radarr and Sonarr. 
+Add libraries pointing at `/data/media/movies`, `/data/media/tv`, and `/data/media/audiobooks` or `/data/media/podcasts` as needed.
+Optionally enable hardware transcoding if the host has a supported GPU.
+
+### Seerr
+
+Open Seerr from the port in the services table.
+On first launch, choose Jellyfin as the media server, enter `http://jellyfin:8096` (hostname `jellyfin`, port `8096`), and sign in with a Jellyfin admin account.
+
+Select the libraries Seerr should scan and start the scan.
+
+Under *Settings → Services*, add Radarr and Sonarr with `http://radarr:7878` and `http://sonarr:8989`, their API keys, and the same root folders and quality profiles used in those apps.
+Mark at least one Radarr server and one Sonarr server as the default.
+Enable scan and automatic search for each server if you want requests to reach the Arr apps immediately.
+
+Optionally import Jellyfin users under *Settings → Users* and configure request permissions and quotas.
+
+Seerr is the successor to Jellyseerr, so older Jellyseerr guides generally apply, but use the current Seerr image and settings names.
+
+### Trailarr
+
+Open Trailarr from the port in the services table.
+Log in with the default credentials `admin` / `trailarr` and change the password.
+
+Go to *Settings → Connections*, add a Radarr connection, and use `http://radarr:7878` as the server URL with Radarr's API key.
+Because Trailarr and Radarr share the same `/data` mount, use the same path for the path mapping.
+Test the connection, validate the path mappings, and save.
+Repeat the steps for Sonarr with `http://sonarr:8989`.
+
+Choose a monitor type for each connection, for example `New` to only download trailers for newly added media.
+Trailarr downloads trailers and stores them alongside the media files.
+
+### Cleanuparr
+
+Open Cleanuparr from the port in the services table.
+On first launch, create an admin account.
+
+Add Radarr and Sonarr with `http://radarr:7878` and `http://sonarr:8989`, their API keys, and the API version that matches each installed application.
+
+Add qBittorrent as a download client with `http://qbittorrent:8080` and qBittorrent's credentials.
+Leave the download path mapping empty because Cleanuparr and qBittorrent share the same `/data` mount.
+
+Configure the Queue Cleaner to remove stalled or failed downloads, and enable the Malware Blocker with a blocklist.
+Cleanuparr maintains blocklists at `https://cleanuparr.pages.dev/static/blacklist`, `https://cleanuparr.pages.dev/static/blacklist_permissive`, `https://cleanuparr.pages.dev/static/whitelist`, and `https://cleanuparr.pages.dev/static/whitelist_with_subtitles`.
+Review the Download Cleaner rules before enabling them so seeding torrents are not removed too early.
+
+### Audiobookshelf
+
+Open Audiobookshelf from the port in the services table.
+There are no default credentials, so create the first admin account.
+
+Add a Books library pointing at `/data/media/audiobooks` and a Podcasts library pointing at `/data/media/podcasts`.
+Create those folders under `${DATA_VOLUME}/data/media` first if they do not exist.
+Choose a metadata provider and let the initial scan complete.
+
+The mobile apps can connect using the host's tailnet address and the Audiobookshelf port.
+
 ## Firewall
-You might need to allow certain ports through your firewall but exercise caution.
-It is better to not manually allow anything through until you come across a situation where you need to.
 
-For example, you might need to allow the port qBittorrent is listening on to prevent your torrents from being firewalled and thus throttled. 
-If you have `ufw` you can allow with this command. 
-```shell 
-sudo ufw allow 6881/tcp # default listening port on qBittorrent
+Allow only the ports you actually need through the host firewall.
+qBittorrent's listening port (`6881` TCP/UDP) usually needs to be allowed and forwarded on the router so torrents are not throttled.
+
+If you use `ufw`:
+
+```shell
+sudo ufw allow 6881/tcp
 sudo ufw allow 6881/udp
 ```
 
-Perhaps you might want to expose Jellyfin, you can run this command. 
-```shell
-sudo ufw allow 8096
-```
-## Useful Links
-- [Servarr Wiki](https://wiki.servarr.com/)
-- [TRaSH Guides](https://trash-guides.info/)
-- [TechHut's Setup](https://github.com/TechHutTV/homelab/)
+Expose media services through the Edge stack and Cloudflare Tunnel rather than opening their ports directly, and only expose services that have authentication enabled.

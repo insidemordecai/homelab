@@ -8,18 +8,7 @@ This stack provides a central dashboard for launching and monitoring the service
 
 ## Setup
 
-### Prerequisites
-
-- Docker and Docker Compose installed on the host.
-- The shared `stacknet` network created (`docker network create stacknet`).
-
 ### Configuration
-
-Create the `.env` file from the template:
-
-```shell
-cp .env.example .env
-```
 
 Generate an encryption key and add it to `.env`:
 
@@ -36,7 +25,6 @@ Review the remaining values in `docker-compose.yml` and adjust ports or volumes 
 ### Docker Integration
 
 The Docker socket is mounted at `/var/run/docker.sock` so the dashboard can display container status and controls.
-
 Remove that volume if you do not need Docker integration.
 
 > [!WARNING]
@@ -63,7 +51,6 @@ dash.example.com {
 ## Data and Maintenance
 
 Application data is stored in `./appdata/homarr`, which is ignored by Git.
-
 Back up that directory before updating the container or changing its configuration.
 
 To update the stack:

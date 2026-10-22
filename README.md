@@ -136,7 +136,7 @@ See the [Dashboard README](dashboard/README.md) for setup and configuration.
 ### Media
 
 Media servers, download clients, and automation.
-All applications share the same data volume (`${DATA_VOLUME}/data:/data`) so downloads and libraries stay consistent across containers.
+The download and media applications share the same data volume (`${DATA_VOLUME}/data:/data`) so downloads and libraries stay consistent across containers.
 
 | Application                                                  | Role                                      | Port    |
 | ------------------------------------------------------------ | ----------------------------------------- | ------- |
