@@ -193,3 +193,30 @@ Docker host. When deployed behind the Edge stack, services are instead reached
 through Caddy using hostnames you configure in `edge/caddy/Caddyfile`, for
 example `https://media.example.com`.
 
+## Security Notes
+
+> [!CAUTION]
+> `.env` files are ignored by Git, but be careful. Do NOT commit or push your
+> local `.env` files, as they contain tokens, encryption keys, and other
+> credentials.
+
+- Keep real values out of `.env.example`; use obvious placeholders such as
+  `pasteYourTokenHere`.
+- Do not expose a service to the internet until it has authentication enabled.
+- Only open firewall ports that you actually need. qBittorrent's listening port
+  (`6881`) is a common exception; see the [Media README](media/README.md#firewall).
+- Back up application configuration (`appdata/`) and media libraries before
+  updating stateful services or changing volume mappings.
+
+## Useful Links
+
+- [Docker documentation](https://docs.docker.com/)
+- [Docker Compose documentation](https://docs.docker.com/compose/)
+- [LinuxServer.io images](https://docs.linuxserver.io/)
+- [Cloudflare Tunnel documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
+- [Caddy documentation](https://caddyserver.com/docs/)
+- [Jellyfin documentation](https://jellyfin.org/docs/)
+- [Servarr Wiki](https://wiki.servarr.com/)
+- [TRaSH Guides](https://trash-guides.info/)
+- [Homarr documentation](https://homarr.dev/docs/)
+
