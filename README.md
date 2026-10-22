@@ -223,3 +223,4 @@ Selected services are exposed publicly through Cloudflare Tunnel or reverse-prox
 - [TRaSH Guides](https://trash-guides.info/)
 - [Homarr documentation](https://homarr.dev/docs/)
 - [Tailscale documentation](https://tailscale.com/kb)
+- [TechHut's Setup](https://github.com/TechHutTV/homelab/)
