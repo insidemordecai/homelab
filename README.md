@@ -16,6 +16,7 @@ Each stack lives in its own directory, ships with a `.env.example` template, and
     - [Create the Shared Network](#create-the-shared-network)
     - [Deploy a Stack](#deploy-a-stack)
     - [Update a Stack](#update-a-stack)
+    - [Update All Stacks](#update-all-stacks)
     - [Common Commands](#common-commands)
 - [Stacks](#stacks)
     - [Edge](#edge)
@@ -34,6 +35,7 @@ homelab
 ├── edge/               # Cloudflare Tunnel + Caddy reverse proxy
 ├── media/              # Media servers, downloaders, and automation
 ├── utilities/          # Small standalone tools
+├── update-stacks.sh    # Update every stack
 └── README.md
 ```
 
@@ -120,6 +122,17 @@ To update a single service, pull and recreate it separately:
 docker compose pull <service>
 docker compose up -d <service>
 ```
+
+### Update All Stacks
+
+From the repository root:
+
+```shell
+./update-stacks.sh
+```
+
+The script discovers every stack directory and updates all services, removing containers for services that were deleted or commented out.
+Use `--dry-run` to preview what will run.
 
 ### Common Commands
 
