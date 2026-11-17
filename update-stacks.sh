@@ -5,6 +5,18 @@ IFS=$'\n\t'
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 DRY_RUN=false
 
+# Enable colour only for interactive terminals and when the environment allows it.
+if [[ -t 1 && -t 2 && -z ${NO_COLOR:-} && ${TERM:-dumb} != "dumb" ]]; then
+    BOLD=$'\033[1m'
+    BLUE=$'\033[34m'
+    GREEN=$'\033[32m'
+    RED=$'\033[31m'
+    YELLOW=$'\033[33m'
+    RESET=$'\033[0m'
+else
+    BOLD='' BLUE='' GREEN='' RED='' YELLOW='' RESET=''
+fi
+
 # Print command-line help.
 usage() {
     cat <<'EOF'
@@ -20,7 +32,7 @@ EOF
 
 # Print an error to stderr and exit with a failure status.
 die() {
-    printf 'error: %s\n' "$*" >&2
+    printf '%serror:%s %s\n' "$RED" "$RESET" "$*" >&2
     exit 1
 }
 
@@ -78,7 +90,7 @@ for compose_file in "${compose_files[@]}"; do
     fi
     seen_dirs["$stack_dir"]=1
 
-    printf '\n==> %s\n' "$stack_name"
+    printf '\n%s==> %s%s\n' "${BOLD}${BLUE}" "$stack_name" "$RESET"
 
     # Print the command without changing containers.
     if $DRY_RUN; then
@@ -91,23 +103,23 @@ for compose_file in "${compose_files[@]}"; do
     # Run in a subshell so cd only affects this stack.
     # Orphan cleanup removes containers for commented-out or deleted services.
     if (cd "$stack_dir" && docker compose up -d --pull always --remove-orphans); then
-        printf '==> %s finished in %ss\n' "$stack_name" "$((SECONDS - started_at))"
+        printf '%s==> %s finished in %ss%s\n' "$GREEN" "$stack_name" "$((SECONDS - started_at))" "$RESET"
     else
-        printf '==> %s failed\n' "$stack_name" >&2
+        printf '%s==> %s failed%s\n' "$RED" "$stack_name" "$RESET" >&2
         failed_stacks+=("$stack_name")
     fi
 done
 
 # Dry runs stop here without printing an update summary.
 if $DRY_RUN; then
-    printf '\nDry run complete; no changes made.\n'
+    printf '\n%sDry run complete; no changes made.%s\n' "$YELLOW" "$RESET"
     exit 0
 fi
 
 # Exit non-zero if any stack failed, after attempting every stack.
 if ((${#failed_stacks[@]} > 0)); then
-    printf '\nFailed stacks: %s\n' "${failed_stacks[*]}" >&2
+    printf '\n%sFailed stacks: %s%s\n' "$RED" "${failed_stacks[*]}" "$RESET" >&2
     exit 1
 fi
 
-printf '\nAll stacks updated successfully.\n'
+printf '\n%sAll stacks updated successfully.%s\n' "$GREEN" "$RESET"
